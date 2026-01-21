@@ -57,3 +57,38 @@ export const signup = async (req,res) => {
         return res.status(500).json({message: 'Server error during signup'});
     }
 }
+
+export const login = async (req,res) => {
+    const {email,password} = req.body;
+    try{
+        if(!email || !password){
+            return res.status(400).json({message: 'All fields are required'});
+        }
+        const user = await User.findOne({email});
+        if(!user){
+            return res.status(400).json({message: 'Invalid credentials'});
+        }
+        const isPasswordCorrect = await bcrypt.compare(password,user.password);
+        if(!isPasswordCorrect){
+            return res.status(400).json({message: 'Invalid credentials'});
+        }
+        //credentials are correct, generate token
+        generateToken(user._id,res);
+        return res.status(200).json({
+            id : user._id,
+            username: user.username,
+            email: user.email,
+            profilePic: user.profilePic
+        });
+    }catch(err){
+        console.log(`login error: ${err.message}`);
+        res.status(500).json({message: 'Server error during login'});
+    }
+}
+
+export const logout = (_,res) => {
+    //basically here we just have to get rid of the token cookies
+    //we wrote 'jwt' in res.cookie because we wrote 'jwt' in generateToken function in utils.js
+    res.cookie('jwt','',{maxAge: 0});
+    return res.status(200).json({message: 'Logged out successfully'});
+}
