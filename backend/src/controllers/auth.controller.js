@@ -2,6 +2,7 @@ import User from "../models/User.js";
 import bcrypt from 'bcryptjs';
 import {generateToken} from '../lib/utils.js';
 import { sendWelcomeEmail } from "../emails/emailHandlers.js";
+import cloudinary from '../lib/cloudinary.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -91,4 +92,25 @@ export const logout = (_,res) => {
     //we wrote 'jwt' in res.cookie because we wrote 'jwt' in generateToken function in utils.js
     res.cookie('jwt','',{maxAge: 0});
     return res.status(200).json({message: 'Logged out successfully'});
+}
+
+export const updateProfile = async (req,res) => {
+    try{
+        const {profilePic} = req.body;
+        if(!profilePic){
+            return res.status(400).json({message: 'Profile picture is required'});
+        }
+
+        const user = req.user._id; //from protectRoute middleware
+        //upload profile picture to cloudinary
+        const uploadResponse = await cloudinary.uploader.upload(profilePic);
+        //update user's profilePic field in database
+        await User.findByIdAndUpdate(user, {profilePic: uploadResponse.secure_url}, {new: true});
+
+        return res.status(200).json({message: 'Profile updated successfully', profilePic: uploadResponse.secure_url});
+
+    }catch(err){
+        console.log(`updateProfile error: ${err.message}`);
+        return res.status(500).json({message: 'Server error during profile update'});
+    }
 }
