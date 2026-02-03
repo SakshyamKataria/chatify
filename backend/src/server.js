@@ -17,7 +17,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json()); //to get user's input ie res.body
 app.use(cookieParser()); //to parse cookies
 app.use('/api/auth', authRoutes);
-app.use('/api/message', messageRoutes);
+app.use('/api/messages', messageRoutes);
 
 //make ready for deployment
 if (process.env.NODE_ENV === 'production') {
