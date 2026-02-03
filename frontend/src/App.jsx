@@ -1,11 +1,31 @@
 import React from 'react'
+import { Routes,Route } from 'react-router-dom'
+import ChatPage from './pages/ChatPage.jsx'
+import LoginPage from './pages/LoginPage.jsx'
+import SignUpPage from './pages/SignUpPage.jsx'
+import { useAuthStore } from './store/useAuthStore.js'
 
 const App = () => {
+  const {authUser, isLoggedIn, login} = useAuthStore(); //to initialize the store and listen for changes, we will use the state values in actual implementation to conditionally render routes based on auth status
+
+  console.log("Auth User:", authUser);
+  console.log("Is Logged In:", isLoggedIn);
+
   return (
-    <div>
-      <h1 className="text-3xl font-bold underline">
-      Hello world!
-      </h1>
+    <div className='min-h-screen bg-slate-900 relative flex item-center justify-center p-4 overflow-hidden'>
+
+      {/* DECORATORS - GRID BG & GLOW SHAPES */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px]" />
+      <div className="absolute top-0 -left-4 size-96 bg-pink-500 opacity-20 blur-[100px]" />
+      <div className="absolute bottom-0 -right-4 size-96 bg-cyan-500 opacity-20 blur-[100px]" />
+
+      <button onClick={login} className='z-10'>login</button>
+
+      <Routes>
+        <Route path='/' element={<ChatPage />} />
+        <Route path='/login' element={<LoginPage />} />
+        <Route path='/signup' element={<SignUpPage />} />
+        </Routes>
     </div>
   )
 }
