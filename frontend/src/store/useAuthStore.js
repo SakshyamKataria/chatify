@@ -6,6 +6,7 @@ export const useAuthStore = create((set,get) => ({  //setter and getter argument
     authUser: null,
     isCheckingAuth: true,
     isSigningUp : false,
+    isLoggingIn : false,
 
     checkAuth: async () => {
         try{
@@ -33,6 +34,33 @@ export const useAuthStore = create((set,get) => ({  //setter and getter argument
             toast.error(error.response?.data?.message || "Sign up failed!");
         }finally{
             set({isSigningUp: false});
+        }
+    },
+
+    login : async (data) => {
+        set({isLoggingIn: true});
+        try{
+            //we will call the signup api 
+            const res = await axiosInstance.post("auth/login",data);
+            //set the authUser with returned data
+            set({authUser:res.data});
+
+            //toast notification can be added here for success
+            toast.success("Logged in successfully");
+        }catch(error){
+            toast.error(error.response?.data?.message || "Login failed!");
+        }finally{
+            set({isLoggingIn: false});
+        }
+    },
+
+    logout : async () => {
+        try{
+            await axiosInstance.post("auth/logout");
+            set({authUser: null});
+            toast.success("Logged out successfully");
+        }catch(error){
+            toast.error("Logout failed!");
         }
     }
 }));
