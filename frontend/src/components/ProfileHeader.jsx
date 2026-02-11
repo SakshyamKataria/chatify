@@ -35,7 +35,7 @@ const ProfileHeader = () => {
           {/* PROFILE IMAGE */}
           <div className='avatar online'> {/* coming from daisy ui */}
             <button className='size-14 rounded-full overflow-hidden realtive group' onClick={()=>fileInputRef.current.click()}>
-              <img src={selectedImg || authUser?.user.profilePic || "/avatar.png"} alt='avatar.png'
+              <img src={selectedImg || authUser?.profilePic || "/avatar.png"} alt='avatar.png'
                 className='size-full object-cover'
               />
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
@@ -52,7 +52,7 @@ const ProfileHeader = () => {
           {/* USERNAME & ONLINE TEXT */}
           <div>
             <h3 className="text-slate-200 font-medium text-base max-w-[180px] truncate">
-              {authUser?.user?.username} {/*  src code have "authUser.fullName" */}
+              {authUser?.username} {/*  src code have "authUser.fullName" */}
             </h3>
 
             <p className="text-slate-400 text-xs">Online</p>

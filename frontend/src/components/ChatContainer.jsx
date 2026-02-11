@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useChatStore } from '../store/useChatStore'
 import { useAuthStore } from '../store/useAuthStore';
 import ChatHeader from './ChatHeader';
@@ -10,6 +10,25 @@ import MessagesLoadingSkeleton from './MeassgesLoadingSkeleton';
 const ChatContainer = () => {
   const {selectedUser, getMessagesByUserId, messages, isMessagesLoading} = useChatStore();
   const {authUser} = useAuthStore();
+
+  const messageEndRef = useRef(null);
+
+  //this useEffect will scroll to the bottom of the chat container every time messages change,
+  // so that the latest message is always visible to the user.
+  //Why you need this:
+
+  // scrollIntoView() is a DOM method that needs direct access to the actual element
+  // You can't use state because state is async and causes re-renders
+  // You need a synchronous, direct reference that persists - that's exactly what useRef provides
+
+  // The key difference from state:
+  // State: Updates cause re-renders and are async
+  // useRef: Updates don't cause re-renders and give you direct DOM access
+  useEffect(()=>{
+    if(messageEndRef.current){
+      messageEndRef.current.scrollIntoView({behavior: 'smooth'}); //smooth scroll to the bottom of the chat container when messages change
+    }
+  },[messages]);
 
   useEffect(()=>{
     if(selectedUser){
@@ -24,9 +43,10 @@ const ChatContainer = () => {
         {messages.length > 0 && !isMessagesLoading ? (
           <div className='max-w-3xl mx-auto space-y-6'>
             {messages.map((msg) => (
-              <div key={msg._id} className={`chat ${msg.senderId === authUser._id ? 'chat-end' : 'chat-start'}`}>
+              <div key={msg._id} className={`chat ${String(msg.senderId) === String(authUser?._id) ? 'chat-end' : 'chat-start'}`}>
+                
                 <div className={`chat-bubble relative 
-                  ${msg.senderId === authUser._id 
+                  ${String(msg.senderId) === String(authUser?._id) 
                   ? 'bg-cyan-600 text-white' 
                   : 'bg-slate-800 text-slate-200'}`}
                 >
@@ -45,6 +65,8 @@ const ChatContainer = () => {
                 </div>
               </div>
             ))}
+            {/* This empty div is used as a reference point to scroll to the bottom of the chat container when new messages arrive. */}
+            <div ref={messageEndRef}></div>
           </div>
         ) : isMessagesLoading ? <MessagesLoadingSkeleton /> : (
           <NoChatHistoryPlaceholder name={selectedUser?.username} />
