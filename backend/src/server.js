@@ -16,7 +16,7 @@ dotenv.config();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors({origin:process.env.CLIENT_URL, credentials:true})); //basically says allow frontend to send cookies to backend
-app.use(express.json()); //to get user's input ie res.body
+app.use(express.json({limit:"5mb"})); //to get user's input ie res.body
 app.use(cookieParser()); //to parse cookies
 app.use('/api/auth', authRoutes);
 app.use('/api/messages', messageRoutes);

@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import axiosInstance from "../lib/axios";
 import toast from "react-hot-toast";
+import { useAuthStore } from "./useAuthStore";
 
 export const useChatStore = create((set,get) => ({
     allContacts : [],
@@ -53,6 +54,39 @@ export const useChatStore = create((set,get) => ({
             toast.error(error.response?.data?.message || "Failed to fetch messages");
         }finally{
             set({isMessagesLoading:false});
+        }
+    },
+
+    sendMessage : async (messageData) => {
+        const {selectedUser, messages} = get(); // Get the selectedUser from the store
+        const {authUser} = useAuthStore.getState(); // Get the authUser from the auth store ie accessing another store inside this store function
+
+        const tempId = `temp-${Date.now()}`; // Temporary ID for optimistic UI update
+
+        const optimisticMessage = {
+            _id: tempId,
+            senderId: authUser._id,
+            recieverId: selectedUser._id,
+            text: messageData.text,
+            image: messageData.image,
+            createdAt: new Date().toISOString(),
+            isOptimistic: true // Flag to identify optimistic message (optional)
+        }
+
+         // Optimistically add the message to the UI before the API call is successful to make the chat feel more responsive.
+        // We will replace this optimistic message with the actual message from the server once we get the response from the API call.
+        // This way, users will see their message appear instantly in the chat, even if there is a slight delay in the network request.
+        set({messages: messages.concat(optimisticMessage)});
+
+        try{
+            const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, messageData);
+            // Update the messages state with the new message
+            set({ messages: messages.concat(res.data) });
+        }catch(error){
+            //this set is to remove the optimistic message from the UI if the API call fails.
+            //  We filter out the optimistic message using its temporary ID.
+            set({messages: messages})
+            toast.error(error.response?.data?.message || "Failed to send message");
         }
     }
 

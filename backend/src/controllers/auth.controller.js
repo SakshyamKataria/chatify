@@ -48,7 +48,12 @@ export const signup = async (req,res) => {
             }catch(err){
                 console.error(`Failed to send welcome email to ${email}: ${err.message}`);
             }
-            return res.status(201).json({message: 'User created successfully'});
+            return res.status(201).json({
+                _id: newUser._id,
+                username: newUser.username,
+                email: newUser.email,
+                profilePic: newUser.profilePic
+            });
         }else{
             return res.status(400).json({message: 'Invalid user data'});
         }
@@ -76,7 +81,7 @@ export const login = async (req,res) => {
         //credentials are correct, generate token
         generateToken(user._id,res);
         return res.status(200).json({
-            id : user._id,
+            _id : user._id,
             username: user.username,
             email: user.email,
             profilePic: user.profilePic
@@ -105,9 +110,9 @@ export const updateProfile = async (req,res) => {
         //upload profile picture to cloudinary
         const uploadResponse = await cloudinary.uploader.upload(profilePic);
         //update user's profilePic field in database
-        await User.findByIdAndUpdate(user, {profilePic: uploadResponse.secure_url}, {new: true});
+        const updatedUser = await User.findByIdAndUpdate(user, {profilePic: uploadResponse.secure_url}, {new: true}).select('-password');
 
-        return res.status(200).json({message: 'Profile updated successfully', profilePic: uploadResponse.secure_url});
+        return res.status(200).json(updatedUser);
 
     }catch(err){
         console.log(`updateProfile error: ${err.message}`);
