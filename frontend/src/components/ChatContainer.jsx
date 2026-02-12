@@ -8,7 +8,7 @@ import MessagesLoadingSkeleton from './MeassgesLoadingSkeleton';
 
 
 const ChatContainer = () => {
-  const {selectedUser, getMessagesByUserId, messages, isMessagesLoading} = useChatStore();
+  const {selectedUser, getMessagesByUserId, messages, isMessagesLoading, subscribeToNewMessages, unsubscribeFromNewMessages} = useChatStore();
   const {authUser} = useAuthStore();
 
   const messageEndRef = useRef(null);
@@ -33,8 +33,11 @@ const ChatContainer = () => {
   useEffect(()=>{
     if(selectedUser){
       getMessagesByUserId(selectedUser._id);
+      subscribeToNewMessages(); // Subscribe to new messages when a user is selected
     }
-  },[selectedUser, getMessagesByUserId]);
+    //cleanup function to unsubscribe from new messages when the component unmounts or when selectedUser changes to prevent memory leaks and unintended behavior
+    return () => unsubscribeFromNewMessages();
+  },[selectedUser, getMessagesByUserId, subscribeToNewMessages, unsubscribeFromNewMessages]);
 
   return (
     <>

@@ -105,6 +105,10 @@ export const useAuthStore = create((set, get) => ({  //setter and getter argumen
 
         set({socket});
 
+        // debug logs for socket lifecycle
+        socket.on('connect', () => console.log('connectSocket: socket connected', socket.id));
+        socket.on('disconnect', (reason) => console.log('connectSocket: socket disconnected', reason));
+
         //listen for online users update from the server and update the onlineUsers state in the store
         socket.on("getOnlineUsers", (userIds) => {
             set({onlineUsers: userIds})

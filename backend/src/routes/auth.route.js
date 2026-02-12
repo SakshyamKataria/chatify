@@ -8,7 +8,7 @@ const router = express.Router();
 router.post('/signup', signup);
 
 //idealy have use arcjet on all routes but it's not wroking properly hence just adding it to login route for now
-router.post('/login',arcjetProtection, login);
+router.post('/login',arcjetProtection, login); 
 //it's best practice to use post method for logout too
 router.post('/logout', logout);
 //protectRoute middleware to ensure only authenticated users can access this route
