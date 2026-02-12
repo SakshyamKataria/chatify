@@ -2,10 +2,12 @@ import React, { useEffect } from 'react'
 import { useChatStore } from '../store/useChatStore.js';
 import UserLoadingSkeleton from './UserLoadingSkeleton.jsx';
 import NoChatsFound from './NoChatsFound.jsx';
+import { useAuthStore } from '../store/useAuthStore.js';
 
 
 const ChatsList = () => {
   const {getMyChatPartners,chats,isUserLoading,setSelectedUser} = useChatStore();
+  const { onlineUsers } = useAuthStore(); 
 
   useEffect(() => {
     getMyChatPartners();
@@ -24,7 +26,7 @@ const ChatsList = () => {
 
           <div className="flex items-center gap-3">
             {/*TODO: Fix this hard coded 'online' with dynamic status using Socket.io */}
-            <div className={`avatar online`}>
+            <div className={`avatar ${onlineUsers.includes(chat._id) ? 'online' : 'offline'}`}>
               <div className="size-12 rounded-full">
                 <img src={chat.profilePic || "/avatar.png"} alt={chat.username} />
               </div>

@@ -11,6 +11,7 @@ const ProfileHeader = () => {
   const {isSoundEnabled, toggleSound} = useChatStore();
   const [selectedImg, setSelectedImg] = useState(null);
   const fileInputRef = useRef(null);
+  const {onlineUsers} = useAuthStore();
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];

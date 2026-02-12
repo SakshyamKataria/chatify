@@ -1,19 +1,26 @@
 import {create} from 'zustand';
 import axiosInstance from '../lib/axios';
 import toast from 'react-hot-toast';
+import { io } from 'socket.io-client';
 
-export const useAuthStore = create((set) => ({  //setter and getter arguments, mostly we use setter
+const baseURL = "http://localhost:3000"; // Replace with your backend URL
+
+export const useAuthStore = create((set, get) => ({  //setter and getter arguments, mostly we use setter
     authUser: null,
     isCheckingAuth: true,
     isSigningUp : false,
     isLoggingIn : false,
     isUpdatingProfile : false,
     onlineUsers: [],
+    socket: null,
 
     checkAuth: async () => {
         try{
             const res = await axiosInstance.get('/auth/check');
             set({authUser: res.data});
+
+            get().connectSocket(); //connect to socket after successful signup
+
         }catch(error){
             console.error("Error checking auth:", error);
             set({authUser: null});
@@ -47,6 +54,8 @@ export const useAuthStore = create((set) => ({  //setter and getter arguments, m
             //set the authUser with returned data
             set({authUser:res.data});
 
+            get().connectSocket(); //connect to socket after successful login
+
             //toast notification can be added here for success
             toast.success("Logged in successfully");
         }catch(error){
@@ -61,6 +70,8 @@ export const useAuthStore = create((set) => ({  //setter and getter arguments, m
             await axiosInstance.post("auth/logout");
             set({authUser: null});
             toast.success("Logged out successfully");
+
+            get().disconnectSocket(); //disconnect socket on logout
         }catch(error){
             toast.error("Logout failed!");
         }
@@ -79,5 +90,32 @@ export const useAuthStore = create((set) => ({  //setter and getter arguments, m
         }finally{
             set({isUpdatingProfile: false});
         }
+    },
+
+    //we will use this function to set the socket instance in our store when the user logs in or signs up successfully.
+    // This way, we can access the socket instance from any component that uses the auth store.
+    connectSocket : () => {
+        const {authUser} = get(); //get the current authUser from the store
+        if(!authUser || get().socket?.connected) return;
+
+        const socket = io(baseURL, {
+            withCredentials: true, //to send cookies with requests
+        });
+        socket.connect();
+
+        set({socket});
+
+        //listen for online users update from the server and update the onlineUsers state in the store
+        socket.on("getOnlineUsers", (userIds) => {
+            set({onlineUsers: userIds})
+        })
+    },
+
+    disconnectSocket : () => {
+        const {socket} = get();
+        if(socket?.connected){
+            socket.disconnect();
+        }
     }
+
 }));
