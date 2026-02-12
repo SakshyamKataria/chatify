@@ -1,6 +1,7 @@
 import Message from "../models/Message.js";
 import User from "../models/User.js";
 import cloudinary from "../lib/cloudinary.js";
+import { io, getReceiverSocketId } from "../lib/socket.js";
 
 export const getAllContacts = async (req, res) => {
     // Implementation for fetching all contacts
@@ -57,6 +58,10 @@ export const sendMessage = async (req, res) => {
         await newMessage.save();
 
         // todo: send message in real-time if user is online using socket.io
+        const recieverSocketId = getReceiverSocketId(receiverId);
+        if(recieverSocketId){
+            io.to(recieverSocketId).emit('newMessage', newMessage);
+        }
 
         res.status(201).json(newMessage);
     }catch(error){
@@ -65,19 +70,6 @@ export const sendMessage = async (req, res) => {
     }
 }
 
-// export const getChatPartners = async (req,res) => {
-//     try{
-//         const myId = req.user._id; //id of the logged in user
-//         //find distinct user ids from messages where logged in user is either sender or receiver
-//         const sentMessages = await Message.find({senderId: myId}).distinct('receiverId');
-//         const receivedMessages = await Message.find({receiverId: myId}).distinct('senderId');
-//         const chatPartnerIds = Array.from(new Set([...sentMessages, ...receivedMessages]));
-//         res.status(200).json(chatPartnerIds);
-//     }catch(error){
-//         console.error(error);
-//         res.status(500).json({message: 'Server error while fetching chat partners'});
-//     }
-// }
 export const getChatPartners = async (req, res) => {
   try {
     const loggedInUserId = req.user._id;
