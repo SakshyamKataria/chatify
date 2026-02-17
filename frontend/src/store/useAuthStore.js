@@ -3,7 +3,7 @@ import axiosInstance from '../lib/axios';
 import toast from 'react-hot-toast';
 import { io } from 'socket.io-client';
 
-const baseURL = "http://localhost:3000"; // Replace with your backend URL
+
 
 export const useAuthStore = create((set, get) => ({  //setter and getter arguments, mostly we use setter
     authUser: null,
