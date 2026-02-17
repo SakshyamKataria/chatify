@@ -12,7 +12,7 @@ const server = http.createServer(app); // Create an HTTP server using the Expres
 // Create a new Socket.IO server and attach it to the HTTP server, with CORS configuration
 const io = new Server(server, {
     cors: {
-        origin : [process.env.CLIENT_URL],
+        origin : process.env.CLIENT_URL, // Allow requests from the client URL specified in environment variables
         credentials : true // Allow credentials (cookies) to be sent with requests from the client
     }, // Allow CORS from the client URL specified in environment variables
 

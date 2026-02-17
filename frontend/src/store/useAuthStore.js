@@ -98,10 +98,10 @@ export const useAuthStore = create((set, get) => ({  //setter and getter argumen
         const {authUser} = get(); //get the current authUser from the store
         if(!authUser || get().socket?.connected) return;
 
-        const socket = io(baseURL, {
+        const socket = io(import.meta.env.VITE_BACKEND_URL, {
             withCredentials: true, //to send cookies with requests
         });
-        socket.connect();
+        // socket.connect();
 
         set({socket});
 

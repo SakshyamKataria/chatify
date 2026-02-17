@@ -24,7 +24,8 @@ export const socketAuthMiddleware = async (socket, next) => {
         //token is valid, get user from token
         const user = await User.findById(decoded.userId).select('-password');
         if(!user){
-            return res.status(401).json({message: 'Not authorized, user not found'});
+            return next(new Error("Not authorized, user not found"));
+
         }
 
         //attach user to socket object so that it can be accessed in socket event handlers
